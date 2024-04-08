@@ -50,13 +50,12 @@ class Line():
         )
 
 class Cell():
-    size = 40
-    def __init__(self, win, walls = 0b0000, pos = Point(0, 0)):
+    def __init__(self, win, walls = 0b0000, pos = Point(0, 0), dimensions = [40, 40]):
         self.walls = walls
         self._x1 = pos.x
-        self._x2 = pos.x + self.size
+        self._x2 = pos.x + dimensions[0]
         self._y1 = pos.y
-        self._y2 = pos.y + self.size
+        self._y2 = pos.y + dimensions[1]
         self._win = win
 
     def draw(self):
