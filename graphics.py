@@ -1,18 +1,23 @@
 import checks
 from tkinter import Tk, BOTH, Canvas
 
-colours = {"background": "AntiqueWhite3"}
+colours = {"background": "AntiqueWhite3",
+           "cellBg": "AntiqueWhite1",
+           "cellWall": "RosyBrown4",
+           "pathActive": "OliveDrab",
+           "pathInctive": "AntiqueWhite3",
+           }
 
 class Window():
-    def __init__(self, dimensions):
-        checks.typeCheck("Window", "dimensions", dimensions, type([]))
-        checks.lenCheck("Window", "dimensions", dimensions, 2, 2)
+    def __init__(self, width, height):
+        checks.typeCheck("Window", "width", width, type(1))
+        checks.typeCheck("Window", "height", height, type(1))
 
         self._root = Tk()
         self._root.title("Maze Solver")
         self._root.protocol("WM_DELETE_WINDOW", self.close)
-        self._width = dimensions[0]
-        self._height = dimensions[1]
+        self._width = width
+        self._height = height
         self._active = False
         self.canvas = Canvas(self._root, 
                              width=800, 
@@ -32,3 +37,28 @@ class Window():
 
     def close(self):
         self._active = False
+
+    def drawLine(self, line, colour):
+        line.draw(self.canvas, colour)
+
+class Point():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+class Line():
+    def __init__(self, point1, point2):
+        checks.typeCheck("line", "point1", point1, type(Point(0, 0)))
+        checks.typeCheck("line", "point2", point2, type(Point(0, 0)))
+
+        self.point1 = point1
+        self.point2 = point2
+
+    def draw(self, canvas, colour):
+        canvas.create_line(
+            self.point1.x, self.point1.y,
+            self.point2.x, self.point2.y,
+            fill = colour,
+            width = 2,
+        )
+        canvas.pack()
