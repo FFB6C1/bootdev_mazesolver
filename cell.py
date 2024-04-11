@@ -7,7 +7,7 @@ from graphics import (
 import checks
 
 class Cell():
-    def __init__(self, position, width, height, win):
+    def __init__(self, position, width, height, win=None, coords = [0,0]):
         checks.typeCheck("Cell", "position", position, type(Point(0,0)))
         checks.typeCheck("Cell", "width", width, type(1))
         checks.typeCheck("Cell", "height", height, type(1))
@@ -20,6 +20,8 @@ class Cell():
         self.centre = Point(position.x + width/2, position.y + height/2)
         self._win = win
         self._images = {}
+        self.visited = False
+        self.coords = coords
 
     def draw(self):
         self._images["bg"] = self._win.canvas.create_rectangle(self._x1, self._y1, self._x2, self._y2, fill=colours["cellBg"], outline = "")
@@ -39,7 +41,7 @@ class Cell():
         ]
 
         if self.walls & 0b0001 == 0b0001:
-            self._images["top"] = self._win.drawLine(wallLines[0], wallColour)
+            self._images["up"] = self._win.drawLine(wallLines[0], wallColour)
         if self.walls & 0b0010 == 0b0010:
             self._images["right"] = self._win.drawLine(wallLines[1], wallColour)
         if self.walls & 0b0100 == 0b0100:
@@ -58,7 +60,7 @@ class Cell():
 
     def breakWall(self, direction):
         wallBreakers = {
-            "top": 0b1110,
+            "up": 0b1110,
             "right": 0b1101,
             "down": 0b1011,
             "left": 0b0111
@@ -69,10 +71,16 @@ class Cell():
 
     def checkWall(self, direction):
         walls = {
-            "top": 0b0001,
+            "up": 0b0001,
             "right": 0b0010,
             "down": 0b0100,
             "left": 0b1000
         }
         checks.tupleCheck("Wall.checkWall", "direction", "walls", direction, walls)
         return self.walls & walls[direction] == walls[direction]
+    
+    def visit(self):
+        self.visited = True
+
+    def unvisit(self):
+        self.visited = False

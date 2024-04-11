@@ -3,6 +3,7 @@ from graphics import (
     Point,
     Line
 )
+from maze import Maze
 
 from cell import (
     Cell,
@@ -11,12 +12,7 @@ from cell import (
 def main():
     newWin = Window(800, 600)
 
-    newCell = Cell(Point(10, 10), 50, 50, newWin)
-    newCell2 = Cell(Point(200, 200), 40, 80, newWin)
-    newCell.draw()
-    newCell2.draw()
-    newCell.drawMove(newCell2)
-    newCell2.breakWall("down")
+    newMaze = Maze(Point(50, 50), 24, 20, 20, 20, newWin)
 
     newWin.waitForClose()
 
