@@ -16,6 +16,7 @@ def main():
     newCell.draw()
     newCell2.draw()
     newCell.drawMove(newCell2)
+    newCell2.breakWall("down")
 
     newWin.waitForClose()
 
