@@ -5,7 +5,7 @@ colours = {"background": "AntiqueWhite3",
            "cellBg": "AntiqueWhite1",
            "cellWall": "RosyBrown4",
            "pathActive": "OliveDrab",
-           "pathInactive": "AntiqueWhite3",
+           "pathInagictive": "AntiqueWhite3",
            }
 
 class Window():
