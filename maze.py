@@ -12,12 +12,15 @@ class Maze():
         self.cellWidth = cellWidth
         self.cellHeight = cellHeight
         self._win = win
+        self.solved = False
+        self.cellsUnvisited = set()
         self.createCells()
+        self.cellsPathed = []
         if self._win != None:
             self.drawCells()
+            self.goalCell = self.maze[self.rows-1][self.cols-1]
             self.makeExits()
-            self.pathCells = []
-            self.makePaths(self.maze[0][0])
+            self.makePaths()
             self.resetVisited()
 
     def createCells(self):
@@ -28,13 +31,13 @@ class Maze():
                 posX = self.x + i*self.cellWidth
                 posY = self.y + j*self.cellHeight
                 new_col.append(Cell(Point(posX, posY), self.cellWidth, self.cellHeight, self._win, [i, j]))
+                self.cellsUnvisited.add(f"{i},{j}")
             self.maze.append(new_col)
         
     def drawCells(self):
         for i in range(self.cols):
             for j in range(self.rows):
                 self.maze[j][i].draw()
-                self.animate()
 
     def animate(self):
         self._win.redraw()
@@ -44,39 +47,80 @@ class Maze():
         self.maze[0][0].breakWall("left")
         self.maze[self.rows-1][self.cols-1].breakWall("right")
 
-    def makePaths(self, cell):
-        cell.visit()
-        if cell not in self.pathCells:
-            self.pathCells.append(cell)
-        directions = []
-        row = cell.coords[0]
-        col = cell.coords[1]
+    def checkVisited(self):
+        if len(self.cellsUnvisited) != 0:
+            self.makePaths(self.cellsPathed[random.randrange(0, len(self.cellsPathed))])
 
-        if row > 0 and self.maze[row-1][col].visited == False:
-            directions.append(["left", self.maze[row-1][col], "right"])
-        if row < self.rows-1 and self.maze[row+1][col].visited == False:
-            directions.append(["right", self.maze[row+1][col], "left"])
-        if col > 0 and self.maze[row][col-1].visited == False:
-            directions.append(["up", self.maze[row][col-1], "down"])
-        if col < self.cols-1 and self.maze[row][col+1].visited == False:
-            directions.append(["down", self.maze[row][col+1], "up"])
+    def makePaths(self):
+        self.makePathsR(self.maze[0][0])
+        while len(self.cellsUnvisited) > 0:
+            self.makePathsR(self.cellsPathed[random.randrange(0,len(self.cellsPathed))])
 
-        if directions == []:
-            if len(self.pathCells) < self.rows * self.cols:
-                self.makePaths(self.pathCells[random.randrange(0, len(self.pathCells))])
+    def makePathsR(self, cell):
+        if cell not in self.cellsPathed:
+            cell.visit()
+            self.cellsPathed.append(cell)
+            self.cellsUnvisited.remove(f"{cell.coords[0]},{cell.coords[1]}")
+        to_visit = []
+        if cell.coords[0] > 0 and self.maze[cell.coords[0] - 1][cell.coords[1]].visited == False:
+            to_visit.append([self.maze[cell.coords[0] - 1][cell.coords[1]], "left", "right"])
+        if cell.coords[0] < self.rows-1 and self.maze[cell.coords[0] + 1][cell.coords[1]].visited == False:
+            to_visit.append([self.maze[cell.coords[0] + 1][cell.coords[1]], "right", "left"])
+        if cell.coords[1] > 0 and self.maze[cell.coords[0]][cell.coords[1] - 1].visited == False:
+            to_visit.append([self.maze[cell.coords[0]][cell.coords[1] - 1], "up", "down"])
+        if cell.coords[1] < self.cols-1 and self.maze[cell.coords[0]][cell.coords[1] + 1].visited == False:
+            to_visit.append([self.maze[cell.coords[0]][cell.coords[1] + 1], "down", "up"])
+        if len(to_visit) == 0:
             return
-            
-
-        destination = directions[random.randrange(0, len(directions))]
-        cell.breakWall(destination[0])
-        destination[1].breakWall(destination[2])
-
+        number = random.randrange(0, len(to_visit))
+        destinationCell = to_visit[number]
+        cell.breakWall(destinationCell[1])
+        destinationCell[0].breakWall(destinationCell[2])
         self.animate()
-        self.makePaths(destination[1])
+        self.makePathsR(destinationCell[0])
         return
 
     def resetVisited(self):
-        for col in self.maze:
-            for cell in col:
-                cell.unvisit()
-                
+        for row in self.maze:
+            for cell in row:
+                cell.visited = False
+
+    def solve(self):
+        return self.solveR(self.maze[0][0])
+    
+    def solveR(self, cell):
+        self.animate()
+        cell.visit()
+        if cell == self.goalCell:
+            return True
+        next_cells = self.checkDir(cell)
+        if next_cells == []:
+            return False
+        for c in next_cells:
+            cell.drawMove(c)
+            if self.solveR(c) == True:
+                return True
+            else:
+                cell.drawMove(c, True)
+        
+    def checkDir(self, cell):
+        directions = []
+        if ( cell.coords[0] > 0 and 
+            cell.checkWall("left") == False and 
+            self.maze[cell.coords[0] - 1][cell.coords[1]].visited == False ):
+            directions.append(self.maze[cell.coords[0] - 1][cell.coords[1]])
+        if ( cell.coords[0] < self.rows - 1 and
+            cell.checkWall("right") == False and
+            self.maze[cell.coords[0] + 1][cell.coords[1]].visited == False):
+            directions.append(self.maze[cell.coords[0] + 1][cell.coords[1]])
+        if ( cell.coords[1] > 0 and
+            cell.checkWall("up") == False and
+            self.maze[cell.coords[0]][cell.coords[1] - 1].visited == False):
+            directions.append(self.maze[cell.coords[0]][cell.coords[1] - 1])
+        if ( cell.coords[1] < self.cols - 1 and
+            cell.checkWall("down") == False and
+            self.maze[cell.coords[0]][cell.coords[1] + 1].visited == False):
+            directions.append(self.maze[cell.coords[0]][cell.coords[1] + 1])
+        return directions
+        
+

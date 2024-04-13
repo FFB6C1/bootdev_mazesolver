@@ -10,9 +10,17 @@ from cell import (
 )
 
 def main():
-    newWin = Window(800, 600)
+    window_height = 800
+    window_width = 600
+    cell_width = 20
+    cell_height = 20
+    border = 50
+    row_size = (window_height - (border*2))//cell_height
+    col_size = (window_width - (border*2))//cell_width
 
-    newMaze = Maze(Point(50, 50), 24, 20, 20, 20, newWin)
+    newWin = Window(window_height, window_width)
+    newMaze = Maze(Point(border, border), row_size, col_size, cell_width, cell_height, newWin)
+    newMaze.solve()
 
     newWin.waitForClose()
 
